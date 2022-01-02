@@ -1,9 +1,11 @@
 const { Client, Intents, MessageEmbed, Permissions } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-const { token } = require('./config.json');
+const { token, prefix } = require('./config.json');
 const { parse } = require('rss-to-json');
 const fs = require("fs");
 const articleJSON = require('./articles.json');
+var cron = require("cron");
+const logger = require("discordjs-logger");
 
 const flags = new Permissions([
   Permissions.FLAGS.VIEW_CHANNEL,
@@ -20,23 +22,74 @@ const flags = new Permissions([
 //Ready commands
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  //client.user.
+  //logger.info("Logged in! Serving in " + kuebiko.guilds.cache.array().length + " servers");
+  //logger.info(prefix+ "help to view a list of commands");
+  client.guilds.cache.forEach(guild => {
+    console.log(`${guild.name} | ${guild.id}`);
 
-  client.user.setActivity("News", {
-    type: "WATCHING"
+  })
+  /*
+  client.user.setActivity("me getting developed", {
+    type: "STREAMING",
+    url: "https://twitch.tv/sleepyrapunzel"
   });
+  */
+  client.user.setPresence({
+    activities: [{
+      name: "my code",
+      type: "WATCHING"
+    }],
+    status: "idle"
+  })
+
+  var scheduleNews = new cron.CronJob('*/10 * * * *', () => {
+    console.log("test")
+    //let channel = client.channels.cache.get('925412639029465088');
+    let channel = client.channels.cache.get('739059784891891785');
+    console.log("Just so you know this function is currently ruinnugn");
+    //channel.send("I'm watching you Goose");
+
+    //  create a  loop that goes through guardian articles
+    //  and sends them to the channel
+    /*
+    const newsEmbed = new MessageEmbed()
+      .setColor('#4EE90B')
+      .setTitle(articleJSON.title)
+      .setURL(articleJSON.link)
+      .setDescription(articleJSON.description)
+      .setTimestamp(articleJSON.published)
+      .setFooter('Published:', 'https://cdn-icons-png.flaticon.com/512/141/141723.png');
+    channel.send({ embeds: [newsEmbed] });
+    */
+    const article = articleJSON;
+    const newsEmbed = new MessageEmbed()
+    newsEmbed.setColor('#4EE90B')
+    for (let i = 0; i < articleJSON.length; i++) {
+      const title = articleJSON[i].title;
+      const link = articleJSON[i].link;
+      newsEmbed.setTitle(article[i].title)
+      newsEmbed.setURL(article[i].link)
+      newsEmbed.setDescription(article[i].description)
+      newsEmbed.setTimestamp(article[i].published)
+
+    }
+    newsEmbed.setFooter('Published:', 'https://cdn-icons-png.flaticon.com/512/141/141723.png%27');
+    channel.send({ embeds: [newsEmbed] });
+
+
+  });
+  //scheduleNews.start();
+
 })
 
 
-client.on('messageCreate', (message, member, permissions) => {
-  if (message.content === "!hello") {
-    message.reply("Hello!")
-  }
-  if (message.content === "!honk") {
+client.on('messageCreate', (message) => {
+  if (message.author.bot) return;
+  if (message.content.startsWith(`${prefix}honk`)) {
     message.channel.send(":gooseHonk:")
   }
-  
-  if (message.content === "!news") {
+
+  if (message.content.startsWith(`${prefix}news`)) {
     var title = articleJSON.title;
     //message.channel.send(articleJSON.link);
     console.log(title)
@@ -48,25 +101,29 @@ client.on('messageCreate', (message, member, permissions) => {
       .setTimestamp(articleJSON.published)
       .setFooter('Published:', 'https://cdn-icons-png.flaticon.com/512/141/141723.png');
     message.channel.send({ embeds: [newsEmbed] });
-    
+
   }
-  if (message.content === "!wattson") {
+  if (message.content.startsWith(`${prefix}wattson`)) {
     message.channel.send("https://tenor.com/view/wattson-apex-wattson-cute-apex-wattson-wattson-paqette-natalie-paqette-gif-21365855");
   }
-  if (message.content === "!admin") {
+  if (message.content.startsWith(`${prefix}addnews`)) {
     //console.log(permissions.has(Permissions.FLAGS.MANAGE_ROLES));
-
     if (message.member.permissions.has('ADMINISTRATOR')) {
       message.reply("User has admin!")
     }
     else {
       message.reply("sorry dumbass")
     }
-
+  }
+  if (message.content.startsWith(`${prefix}serverid`)) {
+    let server = message.guild.id
+    console.log("serverid is:", server)
 
   }
 });
 
+
+/*
 function Article(title, link, description, published) {
   this.title = title;
   this.link = link;
@@ -116,8 +173,20 @@ parse('https://www.theguardian.com/world/rss').then(rss => {
     //console.log("Articles from file:", articleFromFile);
   }
 });
+*/
+function addChannelID(id) {
+  channelIDs.push(id) // Push the new ID to the array
 
+  let newConfigObj = { // Create the new object...
+    //...require('./config.json'), // ...by taking all the current values...
+    channelIDs // ...and updating channelIDs
+  }
 
+  // Create the new string for the file so that it's not too difficult to read
+  let newFileString = JSON.stringify(newConfigObj, null, 2)
+
+  fs.writeFileSync('./server.json', newFileString) // Update the file
+}
 
 
 client.login(token);
