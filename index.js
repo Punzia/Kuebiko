@@ -22,7 +22,7 @@ const queue = new Map();
 
 //Ready commands
 client.on("ready", () => {
-  
+
   console.log(`Logged in as ${client.user.tag}!`);
   //logger.info("Logged in! Serving in " + kuebiko.guilds.cache.array().length + " servers");
   //logger.info(prefix+ "help to view a list of commands");
@@ -85,29 +85,37 @@ client.on("ready", () => {
 })
 
 
-client.on('messageCreate', async message => { 
+client.on('messageCreate', async message => {
   if (message.author.bot) return;
   // Certain maps
   const serverQueue = queue.get(message.guild.id);
 
-  
+
   if (message.content.startsWith(`${prefix}hello`)) {
     message.channel.send("hello")
   }
 
   if (message.content.startsWith(`${prefix}news`)) {
-    var serverList = [];
+    //var serverList = [];
 
     client.guilds.cache.forEach(guild => {
-      //console.log(guild.id)
-      serverList.push(guild.id);
-      //this.guildIdtoPost = guild.id
 
-      //guildIdtoPost.push(guild.id)
-      //console.log(`${guild.name} | ${guild.id}`);
-  
+      //console.log(guild.id)
+      //serverList.push(guild.id);
+      try {
+        const channel = guild.channels.cache.find(channel => channel.name === 'general') || guild.channels.cache.first();
+        if (channel) {
+          channel.send('Hello Cuties');
+        } else {
+          console.log('The server ' + guild.name + ' has no channels.');
+        }
+      } catch (err) {
+        console.log('Could not send message to ' + guild.name + '.');
+      }
     })
     console.log(serverList)
+
+
     /*
     var title = articleJSON.title;
     //message.channel.send(articleJSON.link);
@@ -146,19 +154,19 @@ client.on('messageCreate', async message => {
       if (err) {
         //console.error(err)
         message.channel.send("I'm sorry a file for this server doesn't exist, want me to create it for you?")
-        //const createFile =  ;
-        //await createFile.react('✅');
-        //await createFile.react('❎');
-        //message.channel.send(":apple:***SONDAGE :apple:\n "+choix1+" ou "+""+choix2+"***")
-        //message.channel.send('Do you want me create it for you?')
-        .then(function (message) {
-          message.react("✅")
-          message.react("❎")
-          //message.pin()
-          //message.delete()
-        }).catch(function() {
-          //Something
-         });
+          //const createFile =  ;
+          //await createFile.react('✅');
+          //await createFile.react('❎');
+          //message.channel.send(":apple:***SONDAGE :apple:\n "+choix1+" ou "+""+choix2+"***")
+          //message.channel.send('Do you want me create it for you?')
+          .then(function (message) {
+            message.react("✅")
+            message.react("❎")
+            //message.pin()
+            //message.delete()
+          }).catch(function () {
+            //Something
+          });
         //return
       }
       else {
@@ -224,14 +232,14 @@ parse('https://www.theguardian.com/world/rss').then(rss => {
 });
 */
 client.on('interactionCreate', async interaction => {
-	if (!interaction.isCommand()) return;
+  if (!interaction.isCommand()) return;
 
-	const { commandName } = interaction;
+  const { commandName } = interaction;
 
-	if (commandName === 'react') {
-		const message = await interaction.reply({ content: 'You can react with Unicode emojis!', fetchReply: true });
-		message.react('😄');
-	}
+  if (commandName === 'react') {
+    const message = await interaction.reply({ content: 'You can react with Unicode emojis!', fetchReply: true });
+    message.react('😄');
+  }
 });
 function addChannelID(id) {
   channelIDs.push(id) // Push the new ID to the array
