@@ -2,11 +2,14 @@ const { Client, Intents, MessageEmbed, Permissions } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 const { token, prefix } = require('./config.json');
 const { parse } = require('rss-to-json');
+var Parser = require('rss-parser');
+var cron = require("cron");
 const fs = require("fs");
 const articleJSON = require('./articles.json');
-var cron = require("cron");
-const logger = require("discordjs-logger");
 
+//const logger = require("discordjs-logger");
+
+// Adding flag permission to check permissions of users.
 const flags = new Permissions([
   Permissions.FLAGS.VIEW_CHANNEL,
   Permissions.FLAGS.EMBED_LINKS,
@@ -20,6 +23,7 @@ const queue = new Map();
 
 
 
+
 //Ready commands
 client.on("ready", () => {
 
@@ -30,12 +34,6 @@ client.on("ready", () => {
     //console.log(`${guild.name} | ${guild.id}`);
 
   })
-  /*
-  client.user.setActivity("me getting developed", {
-    type: "STREAMING",
-    url: "https://twitch.tv/sleepyrapunzel"
-  });
-  */
   client.user.setPresence({
     activities: [{
       name: "my code",
@@ -44,43 +42,22 @@ client.on("ready", () => {
     status: "idle"
   })
 
-  var scheduleNews = new cron.CronJob('*/10 * * * *', () => {
-    console.log("test")
-    //let channel = client.channels.cache.get('925412639029465088');
-    let channel = client.channels.cache.get('739059784891891785');
-    console.log("Just so you know this function is currently ruinnugn");
-    //channel.send("I'm watching you Goose");
+  var GuardianCron = new cron.CronJob('*/20 * * * * *', function() {
+    getGuardian();
+    console.log('Guardian Cron Job Ran');
+  })
+  
+  GuardianCron.start();
 
-    //  create a  loop that goes through guardian articles
-    //  and sends them to the channel
-    /*
-    const newsEmbed = new MessageEmbed()
-      .setColor('#4EE90B')
-      .setTitle(articleJSON.title)
-      .setURL(articleJSON.link)
-      .setDescription(articleJSON.description)
-      .setTimestamp(articleJSON.published)
-      .setFooter('Published:', 'https://cdn-icons-png.flaticon.com/512/141/141723.png');
-    channel.send({ embeds: [newsEmbed] });
-    */
-    const article = articleJSON;
-    const newsEmbed = new MessageEmbed()
-    newsEmbed.setColor('#4EE90B')
-    for (let i = 0; i < articleJSON.length; i++) {
-      const title = articleJSON[i].title;
-      const link = articleJSON[i].link;
-      newsEmbed.setTitle(article[i].title)
-      newsEmbed.setURL(article[i].link)
-      newsEmbed.setDescription(article[i].description)
-      newsEmbed.setTimestamp(article[i].published)
+  var japanreutersCron = new cron.CronJob('*/20 * * * * *', function () {
 
-    }
-    newsEmbed.setFooter('Published:', 'https://cdn-icons-png.flaticon.com/512/141/141723.png%27');
-    channel.send({ embeds: [newsEmbed] });
+    getReuters();
+    console.log("hit reutures for articles")
+    //console.log(jpreutersLast24HoursArticles)
 
-
-  });
-  //scheduleNews.start();
+  }, null, true, 'Asia/Tokyo');
+ 
+  japanreutersCron.start();
 
 })
 
@@ -91,10 +68,11 @@ client.on('messageCreate', async message => {
   const serverQueue = queue.get(message.guild.id);
 
 
-  if (message.content.startsWith(`${prefix}hello`)) {
-    message.channel.send("hello")
+  if (message.content.startsWith(`${prefix}help`)) {
+    message.channel.send("hello @everyone")
   }
 
+  /*
   if (message.content.startsWith(`${prefix}news`)) {
     //var serverList = [];
 
@@ -105,7 +83,8 @@ client.on('messageCreate', async message => {
       try {
         const channel = guild.channels.cache.find(channel => channel.name === 'general') || guild.channels.cache.first();
         if (channel) {
-          channel.send('Hello Cuties');
+          console.log("Sent a message to the server");
+          //channel.send('Hello Cuties');
         } else {
           console.log('The server ' + guild.name + ' has no channels.');
         }
@@ -115,122 +94,116 @@ client.on('messageCreate', async message => {
     })
     console.log(serverList)
 
-
-    /*
-    var title = articleJSON.title;
-    //message.channel.send(articleJSON.link);
-    console.log(title)
-    const newsEmbed = new MessageEmbed()
-      .setColor('#4EE90B')
-      .setTitle(title)
-      .setURL(articleJSON.link)
-      .setDescription(articleJSON.description)
-      .setTimestamp(articleJSON.published)
-      .setFooter('Published:', 'https://cdn-icons-png.flaticon.com/512/141/141723.png');
-    message.channel.send({ embeds: [newsEmbed] });
-    */
-
   }
-  if (message.content.startsWith(`${prefix}wattson`)) {
-    message.channel.send("https://tenor.com/view/wattson-apex-wattson-cute-apex-wattson-wattson-paqette-natalie-paqette-gif-21365855");
-  }
-  if (message.content.startsWith(`${prefix}addnews`)) {
+  */
+  if (message.content.startsWith(`${prefix}EnableWorldNewsStream`)) {
     //console.log(permissions.has(Permissions.FLAGS.MANAGE_ROLES));
     if (message.member.permissions.has('ADMINISTRATOR')) {
-      message.reply("User has admin!")
+      message.channel.send("EnableWorldNews")
     }
     else {
-      message.reply("sorry dumbass")
+      //message.channel.send("I'm sorry you have to have higher permission to enable the News Stream.")
     }
   }
-  if (message.content.startsWith(`${prefix}srvfile`)) {
-    let server = message.guild.id
-    console.log(`./servers/${server}.json`)
-    console.log("serverid is:", server)
-    //message.channel.send("server id is: " + server);
-    const path = `./servers/${server}.json`
-
-    fs.access(path, fs.F_OK, (err) => {
-      if (err) {
-        //console.error(err)
-        message.channel.send("I'm sorry a file for this server doesn't exist, want me to create it for you?")
-          //const createFile =  ;
-          //await createFile.react('✅');
-          //await createFile.react('❎');
-          //message.channel.send(":apple:***SONDAGE :apple:\n "+choix1+" ou "+""+choix2+"***")
-          //message.channel.send('Do you want me create it for you?')
-          .then(function (message) {
-            message.react("✅")
-            message.react("❎")
-            //message.pin()
-            //message.delete()
-          }).catch(function () {
-            //Something
-          });
-        //return
-      }
-      else {
-        message.channel.send("Looks like there is a file for this server!");
-      }
-
-      //file exists
-    })
-
+  if (message.content.startsWith(`${prefix}EnableJPNewsStream`)) {
+    //console.log(permissions.has(Permissions.FLAGS.MANAGE_ROLES));
+    if (message.member.permissions.has('ADMINISTRATOR')) {
+      message.channel.send("EnableWorldNews")
+    }
+    else {
+      //message.channel.send("I'm sorry you have to have higher permission to enable the News Stream.")
+    }
   }
+
 });
 
 
-/*
-function Article(title, link, description, published) {
+
+
+
+//===================================================================
+
+function GuardianArticle(title, link, description, published) {
   this.title = title;
   this.link = link;
   this.description = description;
-
   this.published = published;
 }
-
-(async () => {
-
-  var rss = await parse('https://www.theguardian.com/world/rss');
-  rss = resprss
-  //console.log(rss);
-
-})();
-var resprss;
 var guardianArticles = [];
-parse('https://www.theguardian.com/world/rss').then(rss => {
-  // for each rss.description if  the string contains <p> or </p> <a> or </a> then remove them
-  // rss has many items in it
-  //for (var i = 0; i < rss.items.length; i++) {
-  for (var i = 0; i < 1; i++) {
-    var item = rss.items[i];
-    
-    var description = item.description;
-    
-    if (description.includes("&lt;p&gt;") || description.includes("&lt;/p&gt;") || description.includes("&lt;a&gt;") || description.includes("&lt;/a&gt;") || description.includes("&lt;a href=")) {
-      console.log("true");
-      description = description.replace("&lt;p&gt;", "");
-      description = description.replace("&lt;/p&gt;", "");
-      description = description.replace("&lt;a&gt;", "");
-      description = description.replace("&lt;/a&gt;", "");
-      description = description.replace("&lt;a href=", "");
-      //description = description.replace("&lt;p&gt;", "");
+//===================================================================
+
+async function getGuardian() {
+  const feed = await parser.parseURL('https://www.theguardian.com/world/rss');
+
+  console.log(feed.items.length)
+  for (let i = 0; i < feed.items.length; i++) {
+
+    const item = feed.items[i];
+    const article = new GuardianArticle(item.title, item.link, item.contentSnippet, parseDate(item.isoDate));
+    //console.log(article);
+
+    if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
+      guardianArticles.push(article);
+      console.log(article)
     }
 
-
-    var article = new Article(item.title, item.link, description, new Date(item.published));
-    guardianArticles.push(article);
-    console.log(article);
-
-    // Write article object to file..
-    fs.writeFileSync("./articles.json", JSON.stringify(article, null, 4));
-
-    // Read back from the file...
-    const articleFromFile = JSON.parse(fs.readFileSync("./articles.json", "utf8"));
-    //console.log("Articles from file:", articleFromFile);
   }
-});
-*/
+
+}
+
+
+
+//=======================================================
+
+function JpReutersArticle(date, title, link) {
+  this.date = date;
+  this.title = title;
+  this.link = link;
+}
+
+//=======================================================
+
+var parser = new Parser();
+
+//=======================================================
+
+function parseDate(input) {
+  var parts = input.match(/(\d+)/g);
+  // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+//=======================================================
+
+// keep for testing delete once in production
+var jpreutersLast24HoursArticles = [];
+//=======================================================
+
+async function getReuters() {
+
+  const feed = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
+  console.log(feed.items.length)
+  
+  for (let i = 0; i < feed.items.length; i++) {
+
+    const item = feed.items[i];
+    const article = new JpReutersArticle(parseDate(item.isoDate), item.title, item.link);
+    if (item.isoDate > new Date(Date.now() - 3600000)) {
+      jpreutersLast24HoursArticles.push(article);
+      // ADD CODE TO SEND TO JP CHANNEL HERE
+      //let jpchannel = client.channels.cache.get('929467035518398524');
+      console.log("Sent article")
+      
+      //jpchannel.send(article);
+
+    }
+  }
+}
+
+//==========================================================================================
+// <----
+
+/*
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
@@ -241,6 +214,7 @@ client.on('interactionCreate', async interaction => {
     message.react('😄');
   }
 });
+*/
 function addChannelID(id) {
   channelIDs.push(id) // Push the new ID to the array
 
