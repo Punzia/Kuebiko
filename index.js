@@ -41,6 +41,12 @@ client.on("ready", () => {
     }],
     status: "idle"
   })
+  var AljazeeraCron = new cron.CronJob('0 * * * *', function () {
+    getAljazeera();
+    console.log('AljazeeraCron ran at :', new Date());
+
+  });
+  AljazeeraCron.start();
 
   var GuardianCron = new cron.CronJob('0 * * * *', function () {
     getGuardian();
@@ -86,14 +92,19 @@ client.on('interactionCreate', async interaction => {
 
 
 
-client.on('messageCreate', async message => {
+client.on('messageCreate', message => {
   if (message.author.bot) return;
   // Certain maps
   const serverQueue = queue.get(message.guild.id);
 
 
   if (message.content.startsWith(`${prefix}help`)) {
-    message.channel.send("hello @everyone")
+    const newsEmbed = new MessageEmbed()
+    newsEmbed.setColor('#0099ff')
+    newsEmbed.setTitle("help")
+    newsEmbed.setDescription("This will help")
+
+    message.channel.send({ embeds: [newsEmbed] });
   }
 
   /*
@@ -145,6 +156,48 @@ client.on('messageCreate', async message => {
   }
 
 });
+/*======================
+
+
+========================*/
+function AljazeeraArticle(title, link, description, image, published) {
+  this.title = title;
+  this.link = link;
+  this.description = description;
+  this.image = image;
+  this.published = published;
+}
+var _aljazeeraArticle = []
+
+async function getAljazeera() {
+  const feed = await parser.parseURL("https://rss.app/feeds/kPr2jQabyfmE87f8.xml");
+
+  for (let i = 0; i < feed.items.length; i++) {
+    var item = feed.items[i];
+    var title = item.title;
+    var link = item.link;
+    var description = item.contentSnippet;
+    var image = item.enclosure.url;
+    var published = item.pubDate;
+    var article = new AljazeeraArticle(title, link, description, image, published);
+    _aljazeeraArticle.push(article);
+
+
+    if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
+      var _article = _aljazeeraArticle[i];
+      var channel = client.channels.cache.get("929467124714471464")
+      const newsEmbed = new MessageEmbed()
+      newsEmbed.setColor('#0099ff')
+      newsEmbed.setTitle(_article.title)
+      newsEmbed.setURL(_article.link)
+      newsEmbed.setThumbnail()
+      newsEmbed.setDescription(_article.description)
+      channel.send({ embeds: [newsEmbed] });
+
+
+    }
+  }
+}
 
 
 
@@ -161,7 +214,6 @@ client.on('messageCreate', async message => {
 
 /*===================================================================
 Guardian Articles Function Starts Here.
-
 =====================================================================*/
 
 function GuardianArticle(title, link, description, published) {
@@ -183,6 +235,7 @@ async function getGuardian() {
 
     const item = feed.items[i];
     const article = new GuardianArticle(item.title, item.link, item.contentSnippet, parseDate(item.isoDate));
+    
     //console.log(article);
 
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
@@ -244,8 +297,9 @@ async function getReuters() {
 
     const item = feed.items[i];
     const article = new JpReutersArticle(parseDate(item.isoDate), item.title, item.link);
+    jpreutersLast24HoursArticles.push(article);
     if (item.isoDate > new Date(Date.now() - 3600000)) {
-      jpreutersLast24HoursArticles.push(article);
+      
       console.log(jpreutersLast24HoursArticles);
       // ADD CODE TO SEND TO JP CHANNEL HERE
       //let jpchannel = client.channels.cache.get('929467035518398524');
