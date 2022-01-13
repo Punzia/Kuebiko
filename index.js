@@ -32,7 +32,7 @@ client.on("ready", () => {
   //logger.info(prefix+ "help to view a list of commands");
   client.guilds.cache.forEach(guild => {
     //console.log(`${guild.name} | ${guild.id}`);
-
+    //https://javascript.tutorialink.com/discordjs-add-space-between-prefix-and-command/
   })
   client.user.setPresence({
     activities: [{
@@ -42,11 +42,11 @@ client.on("ready", () => {
     status: "idle"
   })
 
-  var GuardianCron = new cron.CronJob('*/20 * * * * *', function() {
+  var GuardianCron = new cron.CronJob('0 * * * *', function () {
     getGuardian();
     console.log('Guardian Cron Job Ran');
   })
-  
+
   GuardianCron.start();
 
   var japanreutersCron = new cron.CronJob('*/20 * * * * *', function () {
@@ -56,10 +56,34 @@ client.on("ready", () => {
     //console.log(jpreutersLast24HoursArticles)
 
   }, null, true, 'Asia/Tokyo');
- 
-  japanreutersCron.start();
+
+  //japanreutersCron.start();
 
 })
+
+/*
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
+
+  const { commandName } = interaction;
+
+  if (commandName === 'ping') {
+    await interaction.reply('Pong!');
+  } else if (commandName === 'server') {
+    await interaction.reply(`Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`);
+  } else if (commandName === 'user') {
+    await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
+  }
+});
+*/
+
+
+
+
+
+
+
+
 
 
 client.on('messageCreate', async message => {
@@ -99,7 +123,12 @@ client.on('messageCreate', async message => {
   if (message.content.startsWith(`${prefix}EnableWorldNewsStream`)) {
     //console.log(permissions.has(Permissions.FLAGS.MANAGE_ROLES));
     if (message.member.permissions.has('ADMINISTRATOR')) {
-      message.channel.send("EnableWorldNews")
+      //message.channel.send("EnableWorldNews")
+      let tmp = message.content.substring(prefix.length, message.length).split(' ')
+      console.log(tmp);
+      //let args = []
+
+
     }
     else {
       //message.channel.send("I'm sorry you have to have higher permission to enable the News Stream.")
@@ -121,7 +150,19 @@ client.on('messageCreate', async message => {
 
 
 
-//===================================================================
+
+
+
+
+
+
+
+
+
+/*===================================================================
+Guardian Articles Function Starts Here.
+
+=====================================================================*/
 
 function GuardianArticle(title, link, description, published) {
   this.title = title;
@@ -129,8 +170,10 @@ function GuardianArticle(title, link, description, published) {
   this.description = description;
   this.published = published;
 }
+
+
 var guardianArticles = [];
-//===================================================================
+
 
 async function getGuardian() {
   const feed = await parser.parseURL('https://www.theguardian.com/world/rss');
@@ -144,14 +187,27 @@ async function getGuardian() {
 
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
       guardianArticles.push(article);
-      console.log(article)
+      console.log("Article" + article)
+
+      //console.log(guardianArticles);
+      var channel = client.channels.cache.get("929467124714471464")
+      //channel.send(guardianArticles[i].title);
+      var _article = guardianArticles[i];
+
+      const newsEmbed = new MessageEmbed()
+      newsEmbed.setColor('#0099ff')
+      newsEmbed.setTitle(_article.title)
+      newsEmbed.setURL(_article.link)
+      newsEmbed.setDescription(_article.description)
+
+      channel.send({ embeds: [newsEmbed] });
+
+
     }
 
   }
 
 }
-
-
 
 //=======================================================
 
@@ -183,17 +239,19 @@ async function getReuters() {
 
   const feed = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
   console.log(feed.items.length)
-  
+
   for (let i = 0; i < feed.items.length; i++) {
 
     const item = feed.items[i];
     const article = new JpReutersArticle(parseDate(item.isoDate), item.title, item.link);
     if (item.isoDate > new Date(Date.now() - 3600000)) {
       jpreutersLast24HoursArticles.push(article);
+      console.log(jpreutersLast24HoursArticles);
       // ADD CODE TO SEND TO JP CHANNEL HERE
       //let jpchannel = client.channels.cache.get('929467035518398524');
       console.log("Sent article")
-      
+
+
       //jpchannel.send(article);
 
     }
