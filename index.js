@@ -41,29 +41,36 @@ client.on("ready", () => {
     }],
     status: "idle"
   })
+  //  start cron job for nikkei every hour
+  var NikkeiCron = new cron.CronJob('0 * * * *', function () {
+    console.log('ran NikkeiCron job at :', Date.now());
+    getNikkei();
+  })
+  NikkeiCron.start()
+
   var AljazeeraCron = new cron.CronJob('0 * * * *', function () {
     getAljazeera();
     console.log('AljazeeraCron ran at :', new Date());
 
   });
-  AljazeeraCron.start();
 
   var GuardianCron = new cron.CronJob('0 * * * *', function () {
     getGuardian();
     console.log('Guardian Cron Job Ran');
   })
 
-  GuardianCron.start();
-
-  var japanreutersCron = new cron.CronJob('*/20 * * * * *', function () {
+  var japanreutersCron = new cron.CronJob('0 * * * *', function () {
 
     getReuters();
-    console.log("hit reutures for articles")
+    console.log("Reutures Cron Job Ran")
     //console.log(jpreutersLast24HoursArticles)
 
   }, null, true, 'Asia/Tokyo');
 
-  //japanreutersCron.start();
+
+  AljazeeraCron.start();
+  GuardianCron.start();
+  japanreutersCron.start();
 
 })
 
@@ -137,6 +144,24 @@ client.on('messageCreate', message => {
       //message.channel.send("EnableWorldNews")
       let tmp = message.content.substring(prefix.length, message.length).split(' ')
       console.log(tmp);
+
+      message.channel.awaitMessages(m => m.author.id == message.author.id,
+        { max: 1, time: 30000 }).then(collected => {
+          // only accept messages by the user who sent the command
+          // accept only 1 message, and return the promise after 30000ms = 30s
+
+          // first (and, in this case, only) message of the collection
+          if (collected.first().content.toLowerCase() == 'yes') {
+            message.reply('Shutting down...');
+            client.destroy();
+          }
+
+          else
+            message.reply('Operation canceled.');
+        }).catch(() => {
+          //message.reply();
+          console.log('No answer after 30 seconds, operation canceled.')
+        });
       //let args = []
 
 
@@ -148,7 +173,14 @@ client.on('messageCreate', message => {
   if (message.content.startsWith(`${prefix}EnableJPNewsStream`)) {
     //console.log(permissions.has(Permissions.FLAGS.MANAGE_ROLES));
     if (message.member.permissions.has('ADMINISTRATOR')) {
-      message.channel.send("EnableWorldNews")
+      var channel = client.channels.cache.get("929467124714471464")
+      const newsEmbed = new MessageEmbed()
+      newsEmbed.setColor('#0099ff')
+      newsEmbed.setTitle(_article.title)
+      newsEmbed.setURL(_article.link)
+      newsEmbed.setThumbnail(_article.image)
+      newsEmbed.setDescription(_article.description)
+      channel.send({ embeds: [newsEmbed] });
     }
     else {
       //message.channel.send("I'm sorry you have to have higher permission to enable the News Stream.")
@@ -156,10 +188,33 @@ client.on('messageCreate', message => {
   }
 
 });
-/*======================
+var _Nikkei = []
+
+async function getNikkei() {
+  const feed = await parser.parseURL('https://assets.wor.jp/rss/rdf/nikkei/society.rdf');
+  console.log(feed.items)
+  for (let i = 0; i < feed.items.length; i++) {
+
+    const item = feed.items[i];
+    const article = new JpReutersArticle(parseDate(item.isoDate), item.title, item.link);
+    // check  if New Date(item.isoDate) is less than one hour  then push it to the array
+    // get time difference in hours between now and the article date
+    // if the difference is less than one hour then push it to the array
+    _Nikkei.push(article);
+
+    if (new Date(item.isoDate) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
+      console.log(article.title)
+      var channel = client.channels.cache.get("929467035518398524")
+      channel.send(article.title)
+    }
 
 
-========================*/
+
+  }
+}
+/*===========================================================
+Aljazeera Articles Function Starts Here
+============================================================*/
 function AljazeeraArticle(title, link, description, image, published) {
   this.title = title;
   this.link = link;
@@ -182,15 +237,22 @@ async function getAljazeera() {
     var article = new AljazeeraArticle(title, link, description, image, published);
     _aljazeeraArticle.push(article);
 
+    _aljazeeraArticle.sort(function (a, b) {
+      return parseDate(b.published) - parseDate(a.published);
+    });
+    // console.log(_aljazeeraArticle.slice(0, 10))
+    console.log("latest article published at " + _aljazeeraArticle[0].published)
+
+
 
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
       var _article = _aljazeeraArticle[i];
       var channel = client.channels.cache.get("929467124714471464")
       const newsEmbed = new MessageEmbed()
-      newsEmbed.setColor('#0099ff')
+      newsEmbed.setColor('#6aa84f')
       newsEmbed.setTitle(_article.title)
       newsEmbed.setURL(_article.link)
-      newsEmbed.setThumbnail()
+      newsEmbed.setThumbnail(_article.image)
       newsEmbed.setDescription(_article.description)
       channel.send({ embeds: [newsEmbed] });
 
@@ -199,21 +261,8 @@ async function getAljazeera() {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*===================================================================
-Guardian Articles Function Starts Here.
+<- Guardian Articles Function Starts Here. ->
 =====================================================================*/
 
 function GuardianArticle(title, link, description, published) {
@@ -235,11 +284,12 @@ async function getGuardian() {
 
     const item = feed.items[i];
     const article = new GuardianArticle(item.title, item.link, item.contentSnippet, parseDate(item.isoDate));
-    
+    guardianArticles.push(article);
     //console.log(article);
 
+    //if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      guardianArticles.push(article);
+
       console.log("Article" + article)
 
       //console.log(guardianArticles);
@@ -262,19 +312,20 @@ async function getGuardian() {
 
 }
 
-//=======================================================
+/*=======================================================
 
+日本語 冠詞 機能 スタート ここ。
+
+=======================================================*/
 function JpReutersArticle(date, title, link) {
   this.date = date;
   this.title = title;
   this.link = link;
 }
 
-//=======================================================
-
 var parser = new Parser();
 
-//=======================================================
+
 
 function parseDate(input) {
   var parts = input.match(/(\d+)/g);
@@ -282,12 +333,11 @@ function parseDate(input) {
   return new Date(parts[0], parts[1] - 1, parts[2]);
 }
 
-//=======================================================
 
 // keep for testing delete once in production
 var jpreutersLast24HoursArticles = [];
-//=======================================================
 
+/*
 async function getReuters() {
 
   const feed = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
@@ -298,16 +348,59 @@ async function getReuters() {
     const item = feed.items[i];
     const article = new JpReutersArticle(parseDate(item.isoDate), item.title, item.link);
     jpreutersLast24HoursArticles.push(article);
+    //if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1009))) {
     if (item.isoDate > new Date(Date.now() - 3600000)) {
-      
+
       console.log(jpreutersLast24HoursArticles);
       // ADD CODE TO SEND TO JP CHANNEL HERE
       //let jpchannel = client.channels.cache.get('929467035518398524');
       console.log("Sent article")
+      var channel = client.channels.cache.get("929467035518398524")
+      //channel.send(guardianArticles[i].title);
+      var _article = jpreutersLast24HoursArticles[i];
+
+      const newsEmbed = new MessageEmbed()
+      newsEmbed.setColor('#e50000')
+      newsEmbed.setTitle(_article.title)
+      newsEmbed.setURL(_article.link)
+      newsEmbed.setDescription(_article.description)
+
+      channel.send({ embeds: [newsEmbed] });
 
 
       //jpchannel.send(article);
 
+    }
+  }
+}
+*/
+async function getReuters() {
+
+  const feed = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
+  console.log(feed.items)
+
+  for (let i = 0; i < feed.items.length; i++) {
+
+    const item = feed.items[i];
+    const article = new JpReutersArticle(parseDate(item.isoDate), item.title, item.link);
+    jpreutersLast24HoursArticles.push(article);
+
+    if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
+      let jpchannel = client.channels.cache.get('929467035518398524');
+      console.log("Sent article")
+      //var channel = client.channels.cache.get("929467035518398524")
+      //channel.send(guardianArticles[i].title);
+      var _article = jpreutersLast24HoursArticles[i];
+
+      const newsEmbed = new MessageEmbed()
+      newsEmbed.setColor('#e50000')
+      newsEmbed.setTitle(_article.title)
+      newsEmbed.setURL(_article.link)
+
+      jpchannel.send({ embeds: [newsEmbed] });
+
+
+      //jpchannel.send(article);
     }
   }
 }
