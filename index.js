@@ -42,23 +42,6 @@ client.on("ready", () => {
     status: "idle"
   })
   //  start cron job for nikkei every hour
-  var NikkeiCron = new cron.CronJob('0 * * * *', function () {
-    console.log('ran NikkeiCron job at :', Date.now());
-    getNikkei();
-  })
-  NikkeiCron.start()
-
-  var AljazeeraCron = new cron.CronJob('0 * * * *', function () {
-    getAljazeera();
-    console.log('AljazeeraCron ran at :', new Date());
-
-  });
-
-  var GuardianCron = new cron.CronJob('0 * * * *', function () {
-    getGuardian();
-    console.log('Guardian Cron Job Ran');
-  })
-
   var japanreutersCron = new cron.CronJob('0 * * * *', function () {
 
     getReuters();
@@ -66,12 +49,22 @@ client.on("ready", () => {
     //console.log(jpreutersLast24HoursArticles)
 
   }, null, true, 'Asia/Tokyo');
+  
+  var RunNewsCron = new cron.CronJob('0 * * * *', function () {
+    getAljazeera();
+    console.log("run Aljazeera")
+    getNikkei();
+    console.log("run Nikkei")
+    getGuardian();
+    getReuters();
+    console.log('AljazeeraCron ran at :', new Date());
 
-
-  AljazeeraCron.start();
-  GuardianCron.start();
-  japanreutersCron.start();
-
+  });
+  RunNewsCron.start();
+  //AljazeeraCron.start();
+  //GuardianCron.start();
+  //japanreutersCron.start();
+  //NikkeiCron.start()
 })
 
 /*
@@ -108,8 +101,10 @@ client.on('messageCreate', message => {
   if (message.content.startsWith(`${prefix}help`)) {
     const newsEmbed = new MessageEmbed()
     newsEmbed.setColor('#0099ff')
-    newsEmbed.setTitle("help")
-    newsEmbed.setDescription("This will help")
+    newsEmbed.setTitle("Some Dinosaur eating a car")
+    newsEmbed.setDescription("This is the description of the news that is being posted")
+    newsEmbed.setThumbnail("https://www.aljazeera.com/favicon_aje.ico")
+    newsEmbed.setImage("https://altdriver.com/wp-content/uploads/sites/2/2020/07/megasaurus-e1632249071292.jpg")
 
     message.channel.send({ embeds: [newsEmbed] });
   }
@@ -203,9 +198,17 @@ async function getNikkei() {
     _Nikkei.push(article);
 
     if (new Date(item.isoDate) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      console.log(article.title)
-      var channel = client.channels.cache.get("929467035518398524")
-      channel.send(article.title)
+      console.log("Nikkei Ran")
+      var jpchannel = client.channels.cache.get("929467035518398524")
+      var n_article = _Nikkei[i];
+
+      const newsEmbed = new MessageEmbed()
+      newsEmbed.setColor('#e50000')
+      newsEmbed.setTitle(n_article.title)
+      newsEmbed.setThumbnail('https://i.imgur.com/poDaGMo.jpg')
+      newsEmbed.setURL(n_article.link)
+
+      jpchannel.send({ embeds: [newsEmbed] });
     }
 
 
@@ -232,7 +235,7 @@ async function getAljazeera() {
     var title = item.title;
     var link = item.link;
     var description = item.contentSnippet;
-    var image = item.enclosure.url;
+    var image = item.content ? item.content.match(/<img.+?src=["'](.+?)["'].+?>/)[1] : null;
     var published = item.pubDate;
     var article = new AljazeeraArticle(title, link, description, image, published);
     _aljazeeraArticle.push(article);
@@ -246,14 +249,16 @@ async function getAljazeera() {
 
 
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      var _article = _aljazeeraArticle[i];
+      console.log("Aljazeera Articles Ran")
+      var a_article = _aljazeeraArticle[i];
       var channel = client.channels.cache.get("929467124714471464")
       const newsEmbed = new MessageEmbed()
-      newsEmbed.setColor('#6aa84f')
-      newsEmbed.setTitle(_article.title)
-      newsEmbed.setURL(_article.link)
-      newsEmbed.setThumbnail(_article.image)
-      newsEmbed.setDescription(_article.description)
+      .setColor('#6aa84f')
+      .setTitle(a_article.title)
+      .setURL(a_article.link)
+      .setImage(a_article.image)
+      .setThumbnail('https://i.imgur.com/GDZRJtM.png')
+      .setDescription(a_article.description)
       channel.send({ embeds: [newsEmbed] });
 
 
@@ -290,18 +295,19 @@ async function getGuardian() {
     //if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
 
-      console.log("Article" + article)
+      console.log("Article sent Guardian")
 
       //console.log(guardianArticles);
       var channel = client.channels.cache.get("929467124714471464")
       //channel.send(guardianArticles[i].title);
-      var _article = guardianArticles[i];
+      var g_article = guardianArticles[i];
 
       const newsEmbed = new MessageEmbed()
       newsEmbed.setColor('#0099ff')
-      newsEmbed.setTitle(_article.title)
-      newsEmbed.setURL(_article.link)
-      newsEmbed.setDescription(_article.description)
+      newsEmbed.setTitle(g_article.title)
+      newsEmbed.setURL(g_article.link)
+      newsEmbed.setThumbnail('https://i.imgur.com/mhfnhJi.jpg')
+      newsEmbed.setDescription(g_article.description)
 
       channel.send({ embeds: [newsEmbed] });
 
@@ -387,15 +393,16 @@ async function getReuters() {
 
     if (new Date(article.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
       let jpchannel = client.channels.cache.get('929467035518398524');
-      console.log("Sent article")
+      console.log("Sent article Reatures!")
       //var channel = client.channels.cache.get("929467035518398524")
       //channel.send(guardianArticles[i].title);
-      var _article = jpreutersLast24HoursArticles[i];
+      var j_article = jpreutersLast24HoursArticles[i];
 
       const newsEmbed = new MessageEmbed()
       newsEmbed.setColor('#e50000')
-      newsEmbed.setTitle(_article.title)
-      newsEmbed.setURL(_article.link)
+      newsEmbed.setTitle(j_article.title)
+      newsEmbed.setURL(j_article.link)
+      newsEmbed.setThumbnail('https://i.imgur.com/klTaUZH.jpg')
 
       jpchannel.send({ embeds: [newsEmbed] });
 
