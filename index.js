@@ -2,9 +2,8 @@ const { Client, Intents, MessageEmbed, Permissions } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 const { token, prefix } = require('./config.json');
 var Parser = require('rss-parser');
-//const { parse } = require('rss-to-json');
 var cron = require("cron");
-const fs = require("fs");
+
 
 var parser = new Parser();
 
@@ -15,30 +14,6 @@ const flags = new Permissions([
   Permissions.FLAGS.READ_MESSAGE_HISTORY,
   Permissions.FLAGS.MANAGE_ROLES,
 ]);
-
-// NEWS STRUCTURE
-// =================================================================
-
-function GuardianArticle(title, link, description, published) {
-  this.title = title;
-  this.link = link;
-  this.description = description;
-  this.published = published;
-}
-
-function JpArticle(date, title, link) {
-  this.date = date;
-  this.title = title;
-  this.link = link;
-}
-
-function AljazeeraArticle(title, link, description, image, published) {
-  this.title = title;
-  this.link = link;
-  this.description = description;
-  this.image = image;
-  this.published = published;
-}
 
 // =================================================================
 
@@ -68,14 +43,16 @@ client.on("ready", () => {
   })
   client.user.setPresence({
     activities: [{
-      name: "my code",
+      name: "the news",
       type: "WATCHING"
     }],
-    status: "idle"
+    status: "online"
   })
   //getNews()
-// news cron runs every 30 mintues
-  var RunNewsCron = new cron.CronJob('0 */30 * * * *', function () {
+  // news cron runs every 10 minutes 
+
+
+  var RunNewsCron = new cron.CronJob('*/30 * * * *', function () {
     getNews()
     console.log('News Cron ran at:', new Date());
 
@@ -107,9 +84,7 @@ client.on('messageCreate', message => {
   /*
   if (message.content.startsWith(`${prefix}news`)) {
     //var serverList = [];
-
     client.guilds.cache.forEach(guild => {
-
       //console.log(guild.id)
       //serverList.push(guild.id);
       try {
@@ -125,7 +100,6 @@ client.on('messageCreate', message => {
       }
     })
     console.log(serverList)
-
   }
   */
   if (message.content.startsWith(`${prefix}EnableWorldNewsStream`)) {
@@ -176,8 +150,6 @@ client.on('messageCreate', message => {
 
 });
 
-// =================================================================
-
 
 // ============================================================
 
@@ -191,6 +163,104 @@ async function getNews() {
   const Nikkeifeed = await parser.parseURL('https://assets.wor.jp/rss/rdf/nikkei/society.rdf');
   const NHKfeed = await parser.parseURL('https://www.nhk.or.jp/rss/news/cat0.xml');
 
+  //-----
+  const YahooTopPicks = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/top-picks.xml');
+  const YahooInternational = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/world.xml');
+  const YahooIT = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/it.xml');
+  const YahooScience = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/science.xml');
+  const YahooEntertainment = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/entertainment.xml');
+  //------------------------------------------------
+  for (let i = 0; i < YahooTopPicks.items.length; i++) {
+    var YahooTopPicksitem = YahooTopPicks.items[i];
+
+    if (new Date(YahooTopPicksitem.isoDate) >= new Date(Date.now() - 3600000)) {
+      console.log("YahooTopPicks Article Published" + YahooTopPicksitem.title)
+      let YahooTopPickschannel = client.channels.cache.get("929467035518398524")
+      const YahooTopPicksEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(YahooTopPicksitem.title)
+        .setDescription(YahooTopPicksitem.contentSnippet)
+        .setURL(YahooTopPicksitem.link)
+        .setTimestamp(new Date(YahooTopPicksitem.isoDate))
+        .setThumbnail('https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg')
+
+      YahooTopPickschannel.send({ embeds: [YahooTopPicksEmbed] });
+    }
+  }
+
+  for (let i = 0; i < YahooInternational.items.length; i++) {
+    var YahooInternationalitem = YahooInternational.items[i];
+
+    if (new Date(YahooInternationalitem.isoDate) >= new Date(Date.now() - 3600000)) {
+      console.log("YahooInternational Article Published" + YahooInternationalitem.title)
+      let YahooInternationalchannel = client.channels.cache.get("929467035518398524")
+      const YahooInternationalEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(YahooInternationalitem.title)
+        .setDescription(YahooInternationalitem.contentSnippet)
+        .setURL(YahooInternationalitem.link)
+        .setTimestamp(new Date(YahooInternationalitem.isoDate))
+        .setThumbnail('https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg')
+
+      YahooInternationalchannel.send({ embeds: [YahooInternationalEmbed] });
+    }
+  }
+
+
+  for (let i = 0; i < YahooIT.items.length; i++) {
+    var YahooITitem = YahooIT.items[i];
+
+    if (new Date(YahooITitem.isoDate) >= new Date(Date.now() - 3600000)) {
+      console.log("YahooIT Article Published" + YahooITitem.title)
+      let YahooITchannel = client.channels.cache.get("929467035518398524")
+      const YahooITEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(YahooITitem.title)
+        .setDescription(YahooITitem.contentSnippet)
+        .setURL(YahooITitem.link)
+        .setTimestamp(new Date(YahooITitem.isoDate))
+        .setThumbnail('https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg')
+
+      YahooITchannel.send({ embeds: [YahooITEmbed] });
+    }
+  }
+
+  for (let i = 0; i < YahooScience.items.length; i++) {
+    var YahooScienceitem = YahooScience.items[i];
+
+    if (new Date(YahooScienceitem.isoDate) >= new Date(Date.now() - 3600000)) {
+      console.log("YahooScience Article Published" + YahooScienceitem.title)
+      let YahooSciencechannel = client.channels.cache.get("929467035518398524")
+      const YahooScienceEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(YahooScienceitem.title)
+        .setDescription(YahooScienceitem.contentSnippet)
+        .setURL(YahooScienceitem.link)
+        .setTimestamp(new Date(YahooScienceitem.isoDate))
+        .setThumbnail('https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg')
+
+      YahooSciencechannel.send({ embeds: [YahooScienceEmbed] });
+    }
+  }
+
+  for (let i = 0; i < YahooEntertainment.items.length; i++) {
+    var YahooEntertainmentitem = YahooEntertainment.items[i];
+
+    if (new Date(YahooEntertainmentitem.isoDate) >= new Date(Date.now() - 3600000)) {
+      console.log("YahooEntertainment Article Published" + YahooEntertainmentitem.title)
+      let YahooEntertainmentchannel = client.channels.cache.get("929467035518398524")
+      const YahooEntertainmentEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(YahooEntertainmentitem.title)
+        .setDescription(YahooEntertainmentitem.contentSnippet)
+        .setURL(YahooEntertainmentitem.link)
+        .setTimestamp(new Date(YahooEntertainmentitem.isoDate))
+        .setThumbnail('https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg')
+
+      YahooEntertainmentchannel.send({ embeds: [YahooEntertainmentEmbed] });
+    }
+  }
+
   // ============================================================================================================
 
   for (let i = 0; i < NHKfeed.items.length; i++) {
@@ -200,7 +270,7 @@ async function getNews() {
       console.log("NHK Article Published" + NHKitem.title)
       let Nhkchannel = client.channels.cache.get("929467035518398524")
       const NHKnewsEmbed = new MessageEmbed()
-        .setColor('#FF69B4')
+        .setColor('FF3B33')
         .setTitle(NHKitem.title)
         .setURL(NHKitem.link)
         .setDescription(NHKitem.contentSnippet)
@@ -209,15 +279,15 @@ async function getNews() {
       Nhkchannel.send({ embeds: [NHKnewsEmbed] });
     }
   }
-    // ============================================================================================================
+  // ============================================================================================================
   for (let i = 0; i < ReutersJP.items.length; i++) {
     var ReutersJPitem = ReutersJP.items[i];
 
     if (new Date(ReutersJPitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("ReutersJP Article Published" + ReutersJParticle.title)
+      console.log("ReutersJP Article Published" + ReutersJPitem.title)
       let ReutersJPchannel = client.channels.cache.get("929467035518398524")
       const ReutersJPEmbed = new MessageEmbed()
-        .setColor('#FF69B4')
+        .setColor('#F9FF33')
         .setTitle(ReutersJPitem.title)
         .setURL(ReutersJPitem.link)
         .setDescription(ReutersJPitem.contentSnippet)
@@ -231,7 +301,7 @@ async function getNews() {
     var Nikkeiitem = Nikkeifeed.items[i];
 
     if (new Date(Nikkeiitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("Nikkei Article Published" + Nikkeiarticle.title)
+      console.log("Nikkei Article Published" + Nikkeiitem.title)
       let Nijchannel = client.channels.cache.get("929467035518398524")
       const NikkeinewsEmbed = new MessageEmbed()
         .setColor('#e50000')
@@ -249,7 +319,7 @@ async function getNews() {
     let Aljazeeitem = Aljazeefeed.items[i];
 
     if (new Date(Aljazeeitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("Aljazeera Article Published" + Aljazeearticle.title)
+      console.log("Aljazeera Article Published" + Aljazeeitem.title)
       let Alchannel = client.channels.cache.get("929467124714471464")
       const AljazeenewsEmbed = new MessageEmbed()
         .setColor('#6aa84f')
@@ -269,10 +339,10 @@ async function getNews() {
     let NYTechitem = NYTechfeed.items[i];
 
     if (new Date(NYTechitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("NYT Article Published" + NYTecharticle.title)
+      console.log("NYT Article Published" + NYTechitem.title)
       let NYTechchannel = client.channels.cache.get("929467124714471464")
       const NYTechnewsEmbed = new MessageEmbed()
-        .setColor('#6aa84f')
+        .setColor('#3394FF')
         .setTitle(NYTechitem.title)
         .setURL(NYTechitem.link)
         .setDescription(NYTechitem.contentSnippet)
@@ -288,10 +358,10 @@ async function getNews() {
     let NYTScienceitem = NYTSciencefeed.items[i];
 
     if (new Date(NYTScienceitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("NYT Article Published" + NYTSciencearticle.title)
+      console.log("NYT Article Published" + NYTScienceitem.title)
       let NYTSciencechannel = client.channels.cache.get("929467124714471464")
       const NYTScienceEmbed = new MessageEmbed()
-        .setColor('#6aa84f')
+        .setColor('#3394FF')
         .setTitle(NYTScienceitem.title)
         .setURL(NYTScienceitem.link)
         .setDescription(NYTScienceitem.contentSnippet)
@@ -306,10 +376,10 @@ async function getNews() {
     let NYTHealthitem = NYTHealthfeed.items[i];
 
     if (new Date(NYTHealthitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("NYT Article Published" + NYTHealtharticle.title)
+      console.log("NYT Article Published" + NYTHealthitem.title)
       let NYTHealthchannel = client.channels.cache.get("929467124714471464")
       const NYTHealthEmbed = new MessageEmbed()
-        .setColor('#6aa84f')
+        .setColor('#3394FF')
         .setTitle(NYTHealthitem.title)
         .setURL(NYTHealthitem.link)
         .setDescription(NYTHealthitem.contentSnippet)
@@ -325,10 +395,10 @@ async function getNews() {
     let ReutersENGitem = ReutersENG.items[i];
 
     if (new Date(ReutersENGitem.isoDate) >= new Date(Date.now() - 1800000)) {
-      console.log("Reuters Article Published" + ReutersENGarticle.title)
+      console.log("Reuters Article Published" + ReutersENGitem.title)
       let ReutersENGchannel = client.channels.cache.get("929467124714471464")
       const ReutersENGEmbed = new MessageEmbed()
-        .setColor('#6aa84f')
+        .setColor('#F9FF33')
         .setTitle(ReutersENGitem.title)
         .setURL(ReutersENGitem.link)
         .setDescription(ReutersENGitem.contentSnippet)
@@ -340,18 +410,18 @@ async function getNews() {
 }
 
 //=====================================================================
-function addChannelID(id) {
-  channelIDs.push(id) // Push the new ID to the array
+// function addChannelID(id) {
+//   channelIDs.push(id) // Push the new ID to the array
 
-  let newConfigObj = { // Create the new object...
-    //...require('./config.json'), // ...by taking all the current values...
-    channelIDs // ...and updating channelIDs
-  }
+//   let newConfigObj = { // Create the new object...
+//     //...require('./config.json'), // ...by taking all the current values...
+//     channelIDs // ...and updating channelIDs
+//   }
 
-  // Create the new string for the file so that it's not too difficult to read
-  let newFileString = JSON.stringify(newConfigObj, null, 2)
+//   // Create the new string for the file so that it's not too difficult to read
+//   let newFileString = JSON.stringify(newConfigObj, null, 2)
 
-  fs.writeFileSync('./server.json', newFileString) // Update the file
-}
+//   fs.writeFileSync('./server.json', newFileString) // Update the file
+// }
 
 client.login(token);
