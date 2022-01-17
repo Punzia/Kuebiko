@@ -73,7 +73,7 @@ client.on("ready", () => {
     }],
     status: "idle"
   })
-  getNews()
+  //getNews()
 // news cron runs every 30 mintues
   var RunNewsCron = new cron.CronJob('0 */30 * * * *', function () {
     getNews()
@@ -183,131 +183,158 @@ client.on('messageCreate', message => {
 
 async function getNews() {
   const Aljazeefeed = await parser.parseURL("https://rss.app/feeds/kPr2jQabyfmE87f8.xml");
-  const Guardianfeed = await parser.parseURL('https://www.theguardian.com/world/rss');
-  const Reutersfeed = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
+  const NYTechfeed = await parser.parseURL("https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml");
+  const NYTSciencefeed = await parser.parseURL("https://rss.nytimes.com/services/xml/rss/nyt/Science.xml");
+  const NYTHealthfeed = await parser.parseURL("https://rss.nytimes.com/services/xml/rss/nyt/Health.xml");
+  const ReutersENG = await parser.parseURL("https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best")
+  const ReutersJP = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
   const Nikkeifeed = await parser.parseURL('https://assets.wor.jp/rss/rdf/nikkei/society.rdf');
   const NHKfeed = await parser.parseURL('https://www.nhk.or.jp/rss/news/cat0.xml');
 
-  //==================================================================
+  // ============================================================================================================
+
   for (let i = 0; i < NHKfeed.items.length; i++) {
     var NHKitem = NHKfeed.items[i];
-    var title = NHKitem.title;
-    var link = NHKitem.link;
-    var description = NHKitem.contentSnippet;
-    var published = NHKitem.isoDate;
 
-    var NHKarticle = new GuardianArticle(title, link, description,parseDate(published));
-    console.log("NHK")
-    console.log(new Date(NHKarticle.published),new Date(new Date().getTime() - (60 * 60 * 1000)))
-    if (new Date(NHKarticle.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      console.log("NHK Article Published"+ NHKarticle.title)
+    if (new Date(NHKitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("NHK Article Published" + NHKitem.title)
       let Nhkchannel = client.channels.cache.get("929467035518398524")
       const NHKnewsEmbed = new MessageEmbed()
-      .setColor('#FF69B4')
-      .setTitle(NHKarticle.title)
-      .setURL(NHKarticle.link)
-      .setTimestamp(NHKarticle.published)
-      .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NHK_World.svg/1280px-NHK_World.svg.png')
+        .setColor('#FF69B4')
+        .setTitle(NHKitem.title)
+        .setURL(NHKitem.link)
+        .setDescription(NHKitem.contentSnippet)
+        .setTimestamp(NHKitem.published)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NHK_World.svg/1280px-NHK_World.svg.png')
       Nhkchannel.send({ embeds: [NHKnewsEmbed] });
     }
   }
+    // ============================================================================================================
+  for (let i = 0; i < ReutersJP.items.length; i++) {
+    var ReutersJPitem = ReutersJP.items[i];
 
-  //=============================================================
-  for (let i = 0; i < Aljazeefeed.items.length; i++) {
-    var Aljazeeitem = Aljazeefeed.items[i];
-    
-    var title = Aljazeeitem.title;
-    var link = Aljazeeitem.link;
-    var description = Aljazeeitem.contentSnippet;
-    var image = Aljazeeitem.content ? Aljazeeitem.content.match(/<img.+?src=["'](.+?)["'].+?>/)[1] : null;
-    var published = Aljazeeitem.pubDate;
-
-    var Aljazeearticle = new AljazeeraArticle(title, link, description, image, published);
-    console.log("Aljazeera")
-    console.log(new Date(Aljazeearticle.published),new Date(new Date().getTime() - (60 * 60 * 1000)))
-    if (new Date(Aljazeearticle.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      console.log("Aljazeera Article Published"+ Aljazeearticle.title)
-      let Alchannel = client.channels.cache.get("929467124714471464")
-      const AljazeenewsEmbed = new MessageEmbed()
-      .setColor('#6aa84f')
-      .setTitle(Aljazeearticle.title)
-      .setURL(Aljazeearticle.link)
-      .setImage(Aljazeearticle.image)
-      .setThumbnail('https://i.imgur.com/GDZRJtM.png')
-      .setDescription(Aljazeearticle.description)
-      Alchannel.send({ embeds: [AljazeenewsEmbed] });
+    if (new Date(ReutersJPitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("ReutersJP Article Published" + ReutersJParticle.title)
+      let ReutersJPchannel = client.channels.cache.get("929467035518398524")
+      const ReutersJPEmbed = new MessageEmbed()
+        .setColor('#FF69B4')
+        .setTitle(ReutersJPitem.title)
+        .setURL(ReutersJPitem.link)
+        .setDescription(ReutersJPitem.contentSnippet)
+        .setTimestamp(ReutersJParticle.published)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NHK_World.svg/1280px-NHK_World.svg.png')
+      ReutersJPchannel.send({ embeds: [ReutersJPEmbed] });
     }
   }
-  //=============================================================
-
-  for (let i = 0; i < Guardianfeed.items.length; i++) {
-    var Guardianitem = Guardianfeed.items[i];
-    
-    var title = Guardianitem.title;
-    var link = Guardianitem.link;
-    var description = Guardianitem.contentSnippet;
-    var published = Guardianitem.isoDate;
-    var Guardianarticle = new GuardianArticle(title, link, description, parseDate(published));
-    console.log("guardian")
-    console.log(new Date(Guardianarticle.published), new Date(new Date().getTime() - (60 * 60 * 1000)))
-    if (new Date(Guardianarticle.published) > new Date(new Date().getTime() - (60 * 60 * 10000))) {
-      console.log("Guardian Article Published"+ Guardianarticle.title)
-      let Guchannel = client.channels.cache.get("929467124714471464")
-      const GuardiannewsEmbed = new MessageEmbed()
-      .setColor('#0099ff')
-      .setTitle(Guardianarticle.title)
-      .setURL(Guardianarticle.link)
-      .setImage(Guardianarticle.image)
-      .setThumbnail('https://i.imgur.com/mhfnhJi.jpg')
-      .setDescription(Guardianarticle.description)
-      Guchannel.send({ embeds: [GuardiannewsEmbed] });
-    }
-  }
-  // //=============================================================
-
-  for (let i = 0; i < Reutersfeed.items.length; i++) {
-    var Reutersitem = Reutersfeed.items[i];
-    var title = Reutersitem.title;
-    var link = Reutersitem.link;
-    var published = Reutersitem.isoDate;
-    var Reutersarticle = new JpArticle(title, link, parseDate(published));
-    console.log("reuters")
-    console.log(new Date(Reutersitem.isoDate) ,new Date(new Date().getTime() - (60 * 60 * 1000)))
-    if (new Date(Reutersitem.published) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      console.log("Reuters Article Published"+ Reutersarticle.title)
-      let Reuchannel = client.channels.cache.get("929467035518398524")
-      const ReutersnewsEmbed = new MessageEmbed()
-      .setColor('#e50000')
-      .setTitle(Reutersarticle.title)
-      .setURL(Reutersarticle.link)
-      .setTimestamp(Reutersarticle.published)
-      .setThumbnail('https://i.imgur.com/klTaUZH.jpg')
-      Reuchannel.send({ embeds: [ReutersnewsEmbed] });
-    }
-  }
-
-  // //=============================================================
-
+  // ============================================================================================================
   for (let i = 0; i < Nikkeifeed.items.length; i++) {
     var Nikkeiitem = Nikkeifeed.items[i];
-    var title = Nikkeiitem.title;
-    var link = Nikkeiitem.link;
-    var published = Nikkeiitem.isoDate;
 
-    var Nikkeiarticle = new JpArticle(parseDate(published), title, link);
-    console.log("Nikkei")
-    console.log(new Date(Nikkeiarticle.published),new Date(new Date().getTime() - (60 * 60 * 1000)))
-    if (new Date(Nikkeiitem.isoDate) > new Date(new Date().getTime() - (60 * 60 * 1000))) {
-      console.log("Nikkei Article Published"+ Nikkeiarticle.title)
+    if (new Date(Nikkeiitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("Nikkei Article Published" + Nikkeiarticle.title)
       let Nijchannel = client.channels.cache.get("929467035518398524")
       const NikkeinewsEmbed = new MessageEmbed()
-      .setColor('#e50000')
-      .setTitle(Nikkeiarticle.title)
-      .setURL(Nikkeiarticle.link)
-      .setTimestamp(Nikkeiarticle.published)
-      .setThumbnail('https://i.imgur.com/poDaGMo.jpg')
-      
+        .setColor('#e50000')
+        .setTitle(Nikkeiitem.title)
+        .setURL(Nikkeiitem.link)
+        .setTimestamp(new Date(Nikkeiitem.isoDate))
+        .setThumbnail('https://i.imgur.com/poDaGMo.jpg')
+
       Nijchannel.send({ embeds: [NikkeinewsEmbed] });
+    }
+  }
+  // ============================================================================================================
+
+  for (let i = 0; i < Aljazeefeed.items.length; i++) {
+    let Aljazeeitem = Aljazeefeed.items[i];
+
+    if (new Date(Aljazeeitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("Aljazeera Article Published" + Aljazeearticle.title)
+      let Alchannel = client.channels.cache.get("929467124714471464")
+      const AljazeenewsEmbed = new MessageEmbed()
+        .setColor('#6aa84f')
+        .setTitle(Aljazeeitem.title)
+        .setURL(Aljazeeitem.link)
+        .setImage(Aljazeeitem.content ? Aljazeeitem.content.match(/<img.+?src=["'](.+?)["'].+?>/)[1] : null)
+        .setThumbnail('https://i.imgur.com/GDZRJtM.png')
+        .setTimestamp(new Date(Aljazeeitem.isoDate))
+        .setDescription(Aljazeeitem.contentSnippet)
+      Alchannel.send({ embeds: [AljazeenewsEmbed] });
+    }
+
+  }
+  // ============================================================================================================
+
+  for (let i = 0; i < NYTechfeed.items.length; i++) {
+    let NYTechitem = NYTechfeed.items[i];
+
+    if (new Date(NYTechitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("NYT Article Published" + NYTecharticle.title)
+      let NYTechchannel = client.channels.cache.get("929467124714471464")
+      const NYTechnewsEmbed = new MessageEmbed()
+        .setColor('#6aa84f')
+        .setTitle(NYTechitem.title)
+        .setURL(NYTechitem.link)
+        .setDescription(NYTechitem.contentSnippet)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
+        .setTimestamp(new Date(NYTechitem.isoDate))
+      NYTechchannel.send({ embeds: [NYTechnewsEmbed] });
+    }
+
+  }
+  // ============================================================================================================
+
+  for (let i = 0; i < NYTSciencefeed.items.length; i++) {
+    let NYTScienceitem = NYTSciencefeed.items[i];
+
+    if (new Date(NYTScienceitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("NYT Article Published" + NYTSciencearticle.title)
+      let NYTSciencechannel = client.channels.cache.get("929467124714471464")
+      const NYTScienceEmbed = new MessageEmbed()
+        .setColor('#6aa84f')
+        .setTitle(NYTScienceitem.title)
+        .setURL(NYTScienceitem.link)
+        .setDescription(NYTScienceitem.contentSnippet)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
+        .setTimestamp(new Date(NYTScienceitem.isoDate))
+      NYTSciencechannel.send({ embeds: [NYTScienceEmbed] });
+    }
+  }
+  // ============================================================================================================
+
+  for (let i = 0; i < NYTHealthfeed.items.length; i++) {
+    let NYTHealthitem = NYTHealthfeed.items[i];
+
+    if (new Date(NYTHealthitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("NYT Article Published" + NYTHealtharticle.title)
+      let NYTHealthchannel = client.channels.cache.get("929467124714471464")
+      const NYTHealthEmbed = new MessageEmbed()
+        .setColor('#6aa84f')
+        .setTitle(NYTHealthitem.title)
+        .setURL(NYTHealthitem.link)
+        .setDescription(NYTHealthitem.contentSnippet)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
+        .setTimestamp(new Date(NYTHealthitem.isoDate))
+      NYTHealthchannel.send({ embeds: [NYTHealthEmbed] });
+    }
+  }
+
+  // ============================================================================================================
+
+  for (let i = 0; i < ReutersENG.items.length; i++) {
+    let ReutersENGitem = ReutersENG.items[i];
+
+    if (new Date(ReutersENGitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("Reuters Article Published" + ReutersENGarticle.title)
+      let ReutersENGchannel = client.channels.cache.get("929467124714471464")
+      const ReutersENGEmbed = new MessageEmbed()
+        .setColor('#6aa84f')
+        .setTitle(ReutersENGitem.title)
+        .setURL(ReutersENGitem.link)
+        .setDescription(ReutersENGitem.contentSnippet)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
+        .setTimestamp(new Date(ReutersENGitem.isoDate))
+      ReutersENGchannel.send({ embeds: [ReutersENGEmbed] });
     }
   }
 }
