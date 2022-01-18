@@ -2,9 +2,9 @@
 Discord Bot that posts news in English and Japanese.
 
 News RSS
-- Yahoo (Tech, Science, Health, International)
-- New York Times
-- BBC
+- Yahoo (IT, Science, Entertainment, International)
+- New York Times (Tech, Science, Health)
+- BBC News
 - Aljazeera
 - Nikkei
 - NHK World Japan
