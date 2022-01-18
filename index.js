@@ -165,31 +165,33 @@ async function getNews() {
   const NHKfeed = await parser.parseURL('https://www.nhk.or.jp/rss/news/cat0.xml');
 
   //-----
-  //const YahooTopPicks = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/top-picks.xml');
+  
   const YahooInternational = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/world.xml');
   const YahooIT = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/it.xml');
   const YahooScience = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/science.xml');
   const YahooEntertainment = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/entertainment.xml');
   //------------------------------------------------
-  /*
-  for (let i = 0; i < YahooTopPicks.items.length; i++) {
-    var YahooTopPicksitem = YahooTopPicks.items[i];
+  const BBCFeed = await parser.parseURL('https://feeds.bbci.co.uk/news/rss.xml?edition=us');
 
-    if (new Date(YahooTopPicksitem.isoDate) >= new Date(Date.now() - 3600000)) {
-      console.log("YahooTopPicks Article Published" + YahooTopPicksitem.title)
-      let YahooTopPickschannel = client.channels.cache.get("929467035518398524")
-      const YahooTopPicksEmbed = new MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle(YahooTopPicksitem.title)
-        .setDescription(YahooTopPicksitem.contentSnippet)
-        .setURL(YahooTopPicksitem.link)
-        .setTimestamp(new Date(YahooTopPicksitem.isoDate))
-        .setThumbnail('https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg')
+  for (let i = 0; i < BBCFeed.items.length; i++) {
+    let BBCitem = BBCFeed.items[i];
 
-      YahooTopPickschannel.send({ embeds: [YahooTopPicksEmbed] });
+    if (new Date(BBCitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("BBC Article Published" + BBCitem.title)
+      let BBCchannel = client.channels.cache.get("929467124714471464")
+      const BBCEmbed = new MessageEmbed()
+        .setAuthor({ name: 'BBC News', iconURL: 'https://i.imgur.com/hZoHXUz.png', url: 'https://bbc.co.uk' })
+        .setColor('#FF0000f')
+        .setTitle(BBCitem.title)
+        .setURL(BBCitem.link)
+        .setDescription(BBCitem.contentSnippet)
+        .setThumbnail('https://i.imgur.com/hZoHXUz.png')
+        .setTimestamp(new Date(BBCitem.isoDate))
+      BBCchannel.send({ embeds: [BBCEmbed] });
     }
   }
-  */
+
+  /*------------*/
 
   for (let i = 0; i < YahooInternational.items.length; i++) {
     var YahooInternationalitem = YahooInternational.items[i];
@@ -288,7 +290,7 @@ async function getNews() {
         .setDescription(NHKitem.contentSnippet)
         .setTimestamp(NHKitem.published)
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NHK_World.svg/1280px-NHK_World.svg.png')
-      
+
       Nhkchannel.send({ embeds: [NHKnewsEmbed] });
     }
   }
@@ -300,7 +302,7 @@ async function getNews() {
       console.log("ReutersJP Article Published" + ReutersJPitem.title)
       let ReutersJPchannel = client.channels.cache.get("929467035518398524")
       const ReutersJPEmbed = new MessageEmbed()
-        .setAuthor({name:'Reuters JP', iconURL:'https://i.imgur.com/klTaUZH.jpg', url:'https://assets.wor.jp'})
+        .setAuthor({ name: 'Reuters JP', iconURL: 'https://i.imgur.com/klTaUZH.jpg', url: 'https://assets.wor.jp' })
         .setColor('#F9FF33')
         .setTitle(ReutersJPitem.title)
         .setURL(ReutersJPitem.link)
@@ -324,7 +326,7 @@ async function getNews() {
         .setURL(Nikkeiitem.link)
         .setTimestamp(new Date(Nikkeiitem.isoDate))
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Nikkei_logo_ja.svg/2560px-Nikkei_logo_ja.svg.png')
-       
+
 
       Nijchannel.send({ embeds: [NikkeinewsEmbed] });
     }
@@ -339,7 +341,7 @@ async function getNews() {
       let Alchannel = client.channels.cache.get("929467124714471464")
       const AljazeenewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'Aljazeera', iconURL: 'https://i.imgur.com/GDZRJtM.png', url: 'https://www.aljazeera.com/' })
-        .setColor('#6aa84f')
+        .setColor('#fa9100')
         .setTitle(Aljazeeitem.title)
         .setURL(Aljazeeitem.link)
         .setImage(Aljazeeitem.content ? Aljazeeitem.content.match(/<img.+?src=["'](.+?)["'].+?>/)[1] : null)
@@ -368,7 +370,7 @@ async function getNews() {
         .setDescription(NYTechitem.contentSnippet)
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
         .setTimestamp(new Date(NYTechitem.isoDate))
-      
+
       NYTechchannel.send({ embeds: [NYTechnewsEmbed] });
     }
 
@@ -389,7 +391,7 @@ async function getNews() {
         .setDescription(NYTScienceitem.contentSnippet)
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
         .setTimestamp(new Date(NYTScienceitem.isoDate))
-      
+
       NYTSciencechannel.send({ embeds: [NYTScienceEmbed] });
     }
   }
@@ -409,7 +411,7 @@ async function getNews() {
         .setDescription(NYTHealthitem.contentSnippet)
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
         .setTimestamp(new Date(NYTHealthitem.isoDate))
-      
+
       NYTHealthchannel.send({ embeds: [NYTHealthEmbed] });
     }
   }
@@ -430,7 +432,7 @@ async function getNews() {
         .setDescription(ReutersENGitem.contentSnippet)
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
         .setTimestamp(new Date(ReutersENGitem.isoDate))
-      
+
       ReutersENGchannel.send({ embeds: [ReutersENGEmbed] });
     }
   }
