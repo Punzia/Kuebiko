@@ -181,7 +181,7 @@ async function getNews() {
       let BBCchannel = client.channels.cache.get("929467124714471464")
       const BBCEmbed = new MessageEmbed()
         .setAuthor({ name: 'BBC News', iconURL: 'https://i.imgur.com/hZoHXUz.png', url: 'https://bbc.co.uk' })
-        .setColor('#0099ff')
+        .setColor('#FF0000')
         .setTitle(BBCitem.title)
         .setURL(BBCitem.link)
         .setDescription(BBCitem.contentSnippet)
