@@ -163,7 +163,7 @@ async function getNews() {
   const ReutersJP = await parser.parseURL('https://assets.wor.jp/rss/rdf/reuters/top.rdf');
   const Nikkeifeed = await parser.parseURL('https://assets.wor.jp/rss/rdf/nikkei/society.rdf');
   const NHKfeed = await parser.parseURL('https://www.nhk.or.jp/rss/news/cat0.xml');
-
+  const NYTimesfeed = await parser.parseURL('https://rss.nytimes.com/services/xml/rss/nyt/World.xml');
   //-----
   
   const YahooInternational = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/world.xml');
@@ -181,7 +181,7 @@ async function getNews() {
       let BBCchannel = client.channels.cache.get("929467124714471464")
       const BBCEmbed = new MessageEmbed()
         .setAuthor({ name: 'BBC News', iconURL: 'https://i.imgur.com/hZoHXUz.png', url: 'https://bbc.co.uk' })
-        .setColor('#FF0000f')
+        .setColor('#0099ff')
         .setTitle(BBCitem.title)
         .setURL(BBCitem.link)
         .setDescription(BBCitem.contentSnippet)
@@ -303,7 +303,7 @@ async function getNews() {
       let ReutersJPchannel = client.channels.cache.get("929467035518398524")
       const ReutersJPEmbed = new MessageEmbed()
         .setAuthor({ name: 'Reuters JP', iconURL: 'https://i.imgur.com/klTaUZH.jpg', url: 'https://assets.wor.jp' })
-        .setColor('#F9FF33')
+        .setColor('#0099ff')
         .setTitle(ReutersJPitem.title)
         .setURL(ReutersJPitem.link)
         .setDescription(ReutersJPitem.contentSnippet)
@@ -321,7 +321,7 @@ async function getNews() {
       let Nijchannel = client.channels.cache.get("929467035518398524")
       const NikkeinewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'Nikkei JP', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Nikkei_logo_ja.svg/2560px-Nikkei_logo_ja.svg.png', url: 'https://www.nikkei.com/' })
-        .setColor('#e50000')
+        .setColor('#0099ff')
         .setTitle(Nikkeiitem.title)
         .setURL(Nikkeiitem.link)
         .setTimestamp(new Date(Nikkeiitem.isoDate))
@@ -364,7 +364,7 @@ async function getNews() {
       let NYTechchannel = client.channels.cache.get("929467124714471464")
       const NYTechnewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times Tech', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png', url: 'https://www.nytimes.com/section/technology' })
-        .setColor('#3394FF')
+        .setColor('#0099ff')
         .setTitle(NYTechitem.title)
         .setURL(NYTechitem.link)
         .setDescription(NYTechitem.contentSnippet)
@@ -385,7 +385,7 @@ async function getNews() {
       let NYTSciencechannel = client.channels.cache.get("929467124714471464")
       const NYTScienceEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times Science', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png', url: 'https://www.nytimes.com/section/science' })
-        .setColor('#3394FF')
+        .setColor('#0099ff')
         .setTitle(NYTScienceitem.title)
         .setURL(NYTScienceitem.link)
         .setDescription(NYTScienceitem.contentSnippet)
@@ -405,7 +405,7 @@ async function getNews() {
       let NYTHealthchannel = client.channels.cache.get("929467124714471464")
       const NYTHealthEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times Health', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png', url: 'https://www.nytimes.com/section/health' })
-        .setColor('#3394FF')
+        .setColor('#0099ff')
         .setTitle(NYTHealthitem.title)
         .setURL(NYTHealthitem.link)
         .setDescription(NYTHealthitem.contentSnippet)
@@ -426,15 +426,36 @@ async function getNews() {
       let ReutersENGchannel = client.channels.cache.get("929467124714471464")
       const ReutersENGEmbed = new MessageEmbed()
         .setAuthor({ name: 'Reatures ENG', iconURL: 'https://i.imgur.com/klTaUZH.jpg', url: 'https://www.nytimes.com/section/science' })
-        .setColor('#F9FF33')
+        .setColor('#0099ff')
         .setTitle(ReutersENGitem.title)
         .setURL(ReutersENGitem.link)
         .setDescription(ReutersENGitem.contentSnippet)
-        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
+        .setThumbnail('https://i.imgur.com/klTaUZH.jpg')
         .setTimestamp(new Date(ReutersENGitem.isoDate))
 
       ReutersENGchannel.send({ embeds: [ReutersENGEmbed] });
     }
+  }
+
+  //--------------------------------------
+  for (let i = 0; i < NYTimesfeed.items.length; i++) {
+    let NYTimesitem =  NYTimesfeed.items[i];
+
+    if (new Date(NYTimesitem.isoDate) >= new Date(Date.now() - 1800000)) {
+      console.log("NYT Article Published" + NYTimesitem.title)
+      let NYTimeschannel = client.channels.cache.get("929467124714471464")
+      const NYTimesnewsEmbed = new MessageEmbed()
+        .setAuthor({ name: 'New York Times', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png', url: 'https://www.nytimes.com' })
+        .setColor('#0099ff')
+        .setTitle(NYTimesitem.title)
+        .setURL(NYTimesitem.link)
+        .setDescription(NYTimesitem.contentSnippet)
+        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png')
+        .setTimestamp(new Date(NYTimesitem.isoDate))
+
+        NYTimeschannel.send({ embeds: [NYTimesnewsEmbed] });
+    }
+
   }
 }
 
