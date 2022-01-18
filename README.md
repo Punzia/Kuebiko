@@ -1,4 +1,11 @@
 # Kuebiko
 Discord Bot that posts news in English and Japanese.
 
+News RSS
+- Yahoo
+- BBC
+- Aljzeera
+- Nikkei
+- NHK World Japan
+
 ![34234](https://user-images.githubusercontent.com/28727157/149986375-7ca79778-f695-4525-984c-ea50e63cbd8f.png)
