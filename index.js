@@ -327,7 +327,7 @@ async function getNews() {
         .setTitle(ReutersJPitem.title)
         .setURL(ReutersJPitem.link)
         .setDescription(ReutersJPitem.contentSnippet)
-        .setTimestamp(ReutersJParticle.published)
+        .setTimestamp(ReutersJPitem.published)
         .setThumbnail('https://i.imgur.com/klTaUZH.jpg')
       ReutersJPchannel.send({ embeds: [ReutersJPEmbed] });
     }
