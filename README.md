@@ -5,7 +5,7 @@ News RSS
 - Yahoo (Tech, Science, Health, International)
 - New York Times
 - BBC
-- Aljzeera
+- Aljazeera
 - Nikkei
 - NHK World Japan
 
