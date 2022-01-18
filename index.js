@@ -62,7 +62,6 @@ client.on("ready", () => {
 
 // =================================================================
 // create a function that grabs the channel 
-
 // =================================================================
 client.on('messageCreate', message => {
   if (message.author.bot) return;
@@ -149,6 +148,27 @@ client.on('messageCreate', message => {
     }
   }
 
+
+});
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
+
+  const { commandName } = interaction;
+
+  if (commandName === 'help') {
+    await interaction.reply('No help from me, sorry');
+  } else if (commandName === 'enableworldns') {
+    await interaction.reply('Enable the news stream now!');
+  }
+  else if (commandName === 'disableeworldns') {
+    await interaction.reply('Disabling the news stream now.');
+  }
+  else if (commandName === 'enablejpns') {
+    await interaction.reply("Arigatou, you're all set");
+  }
+  else if (commandName === 'disablejpns') {
+    await interaction.reply("B-Baka, fine hmph");
+  }
 });
 
 
@@ -165,7 +185,7 @@ async function getNews() {
   const NHKfeed = await parser.parseURL('https://www.nhk.or.jp/rss/news/cat0.xml');
   const NYTimesfeed = await parser.parseURL('https://rss.nytimes.com/services/xml/rss/nyt/World.xml');
   //-----
-  
+
   const YahooInternational = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/world.xml');
   const YahooIT = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/it.xml');
   const YahooScience = await parser.parseURL('https://news.yahoo.co.jp/rss/topics/science.xml');
@@ -439,7 +459,7 @@ async function getNews() {
 
   //--------------------------------------
   for (let i = 0; i < NYTimesfeed.items.length; i++) {
-    let NYTimesitem =  NYTimesfeed.items[i];
+    let NYTimesitem = NYTimesfeed.items[i];
 
     if (new Date(NYTimesitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("NYT Article Published" + NYTimesitem.title)
@@ -453,7 +473,7 @@ async function getNews() {
         .setThumbnail('https://i.imgur.com/F2BvhTh.jpg')
         .setTimestamp(new Date(NYTimesitem.isoDate))
 
-        NYTimeschannel.send({ embeds: [NYTimesnewsEmbed] });
+      NYTimeschannel.send({ embeds: [NYTimesnewsEmbed] });
     }
 
   }
