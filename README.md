@@ -8,6 +8,7 @@ News RSS
 - Aljazeera
 - Nikkei
 - NHK World Japan
+- Reatures (ENG and JP.)
 
 ![34234](https://user-images.githubusercontent.com/28727157/149986375-7ca79778-f695-4525-984c-ea50e63cbd8f.png)
 
