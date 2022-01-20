@@ -55,6 +55,7 @@ client.on("ready", () => {
   var RunNewsCron = new cron.CronJob('*/30 * * * *', function () {
     getNews()
     console.log('News Cron ran at:', new Date());
+    console.log("-------------------------")
 
   });
   RunNewsCron.start();
@@ -134,7 +135,7 @@ client.on('messageCreate', message => {
   if (message.content.startsWith(`${prefix}EnableJPNewsStream`)) {
     //console.log(permissions.has(Permissions.FLAGS.MANAGE_ROLES));
     if (message.member.permissions.has('ADMINISTRATOR')) {
-      var channel = client.channels.cache.get("929467124714471464")
+      var channel = client.channels.cache.get(newsChannel)
       const newsEmbed = new MessageEmbed()
       newsEmbed.setColor('#0099ff')
       newsEmbed.setTitle(_article.title)
@@ -175,6 +176,11 @@ client.on('interactionCreate', async interaction => {
 // ============================================================
 
 async function getNews() {
+  // Define the channels for JP and English News.
+  const newsChannel = "933835002163105802";
+  const JPnewsChannel = "933834935712768040"
+  const NewsSeparator = "---------------------------"
+
   const Aljazeefeed = await parser.parseURL("https://rss.app/feeds/kPr2jQabyfmE87f8.xml");
   const NYTechfeed = await parser.parseURL("https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml");
   const NYTSciencefeed = await parser.parseURL("https://rss.nytimes.com/services/xml/rss/nyt/Science.xml");
@@ -198,7 +204,7 @@ async function getNews() {
 
     if (new Date(BBCitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("BBC Article Published" + BBCitem.title)
-      let BBCchannel = client.channels.cache.get("929467124714471464")
+      let BBCchannel = client.channels.cache.get(newsChannel)
       const BBCEmbed = new MessageEmbed()
         .setAuthor({ name: 'BBC News', iconURL: 'https://i.imgur.com/hZoHXUz.png', url: 'https://bbc.co.uk' })
         .setColor('#FF0000')
@@ -208,6 +214,7 @@ async function getNews() {
         .setThumbnail('https://i.imgur.com/hZoHXUz.png')
         .setTimestamp(new Date(BBCitem.isoDate))
       BBCchannel.send({ embeds: [BBCEmbed] });
+      BBCchannel.send(NewsSeparator);
     }
   }
 
@@ -218,7 +225,7 @@ async function getNews() {
 
     if (new Date(YahooInternationalitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("YahooInternational Article Published" + YahooInternationalitem.title)
-      let YahooInternationalchannel = client.channels.cache.get("929467035518398524")
+      let YahooInternationalchannel = client.channels.cache.get(JPnewsChannel)
       const YahooInternationalEmbed = new MessageEmbed()
         .setAuthor({ name: 'Yahoo - International', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg', url: 'https://news.yahoo.co.jp' })
         .setColor('#0099ff')
@@ -230,6 +237,7 @@ async function getNews() {
 
 
       YahooInternationalchannel.send({ embeds: [YahooInternationalEmbed] });
+      YahooInternationalchannel.send(NewsSeparator);
     }
   }
 
@@ -239,7 +247,7 @@ async function getNews() {
 
     if (new Date(YahooITitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("YahooIT Article Published" + YahooITitem.title)
-      let YahooITchannel = client.channels.cache.get("929467035518398524")
+      let YahooITchannel = client.channels.cache.get(JPnewsChannel)
       const YahooITEmbed = new MessageEmbed()
         .setAuthor({ name: 'Yahoo - IT', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg', url: 'https://news.yahoo.co.jp' })
         .setColor('#0099ff')
@@ -251,6 +259,7 @@ async function getNews() {
       //.setFooter({ text: 'Yahoo IT', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg' })
 
       YahooITchannel.send({ embeds: [YahooITEmbed] });
+      YahooITchannel.send(NewsSeparator);
     }
   }
 
@@ -259,7 +268,7 @@ async function getNews() {
 
     if (new Date(YahooScienceitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("YahooScience Article Published" + YahooScienceitem.title)
-      let YahooSciencechannel = client.channels.cache.get("929467035518398524")
+      let YahooSciencechannel = client.channels.cache.get(JPnewsChannel)
       const YahooScienceEmbed = new MessageEmbed()
         .setAuthor({ name: 'Yahoo - Science', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg', url: 'https://news.yahoo.co.jp' })
         .setColor('#0099ff')
@@ -271,6 +280,7 @@ async function getNews() {
       //.setFooter({ text: 'Yahoo Science', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg' })
 
       YahooSciencechannel.send({ embeds: [YahooScienceEmbed] });
+      YahooSciencechannel.send(NewsSeparator);
     }
   }
 
@@ -279,7 +289,7 @@ async function getNews() {
 
     if (new Date(YahooEntertainmentitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("YahooEntertainment Article Published" + YahooEntertainmentitem.title)
-      let YahooEntertainmentchannel = client.channels.cache.get("929467035518398524")
+      let YahooEntertainmentchannel = client.channels.cache.get(JPnewsChannel)
       const YahooEntertainmentEmbed = new MessageEmbed()
         .setAuthor({ name: 'Yahoo - International', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg', url: 'https://news.yahoo.co.jp' })
         .setColor('#0099ff')
@@ -291,6 +301,7 @@ async function getNews() {
       //.setFooter({ text: 'Yahoo Entertainment', iconURL: 'https://toraumanight.com/wp-content/uploads/2018/08/168058.jpg' })
 
       YahooEntertainmentchannel.send({ embeds: [YahooEntertainmentEmbed] });
+      YahooEntertainmentchannel.send(NewsSeparator);
     }
   }
 
@@ -301,7 +312,7 @@ async function getNews() {
 
     if (new Date(NHKitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("NHK Article Published" + NHKitem.title)
-      let Nhkchannel = client.channels.cache.get("929467035518398524")
+      let Nhkchannel = client.channels.cache.get(JPnewsChannel)
       const NHKnewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'NHK World Japan', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NHK_World.svg/1280px-NHK_World.svg.png', url: 'https://www.nhk.or.jp/' })
         .setColor('FF3B33')
@@ -312,6 +323,7 @@ async function getNews() {
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NHK_World.svg/1280px-NHK_World.svg.png')
 
       Nhkchannel.send({ embeds: [NHKnewsEmbed] });
+      Nhkchannel.send(NewsSeparator);
     }
   }
   // ============================================================================================================
@@ -320,7 +332,7 @@ async function getNews() {
 
     if (new Date(ReutersJPitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("ReutersJP Article Published" + ReutersJPitem.title)
-      let ReutersJPchannel = client.channels.cache.get("929467035518398524")
+      let ReutersJPchannel = client.channels.cache.get(JPnewsChannel)
       const ReutersJPEmbed = new MessageEmbed()
         .setAuthor({ name: 'Reuters JP', iconURL: 'https://i.imgur.com/klTaUZH.jpg', url: 'https://assets.wor.jp' })
         .setColor('#0099ff')
@@ -330,6 +342,7 @@ async function getNews() {
         .setTimestamp(ReutersJPitem.published)
         .setThumbnail('https://i.imgur.com/klTaUZH.jpg')
       ReutersJPchannel.send({ embeds: [ReutersJPEmbed] });
+      ReutersJPchannel.send(NewsSeparator);
     }
   }
   // ============================================================================================================
@@ -338,7 +351,7 @@ async function getNews() {
 
     if (new Date(Nikkeiitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("Nikkei Article Published" + Nikkeiitem.title)
-      let Nijchannel = client.channels.cache.get("929467035518398524")
+      let Nijchannel = client.channels.cache.get(JPnewsChannel)
       const NikkeinewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'Nikkei JP', iconURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Nikkei_logo_ja.svg/2560px-Nikkei_logo_ja.svg.png', url: 'https://www.nikkei.com/' })
         .setColor('#0099ff')
@@ -349,16 +362,17 @@ async function getNews() {
 
 
       Nijchannel.send({ embeds: [NikkeinewsEmbed] });
+      Nijchannel.send(NewsSeparator);
     }
   }
   // ============================================================================================================
-
+  /*
   for (let i = 0; i < Aljazeefeed.items.length; i++) {
     let Aljazeeitem = Aljazeefeed.items[i];
 
     if (new Date(Aljazeeitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("Aljazeera Article Published" + Aljazeeitem.title)
-      let Alchannel = client.channels.cache.get("929467124714471464")
+      let Alchannel = client.channels.cache.get(newsChannel)
       const AljazeenewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'Aljazeera', iconURL: 'https://i.imgur.com/GDZRJtM.png', url: 'https://www.aljazeera.com/' })
         .setColor('#fa9100')
@@ -374,6 +388,7 @@ async function getNews() {
     }
 
   }
+  */
   // ============================================================================================================
 
   for (let i = 0; i < NYTechfeed.items.length; i++) {
@@ -381,7 +396,7 @@ async function getNews() {
 
     if (new Date(NYTechitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("NYT Article Published" + NYTechitem.title)
-      let NYTechchannel = client.channels.cache.get("929467124714471464")
+      let NYTechchannel = client.channels.cache.get(newsChannel)
       const NYTechnewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times - Tech', iconURL: 'https://i.imgur.com/F2BvhTh.jpg', url: 'https://www.nytimes.com/section/technology' })
         .setColor('#000000')
@@ -392,6 +407,7 @@ async function getNews() {
         .setTimestamp(new Date(NYTechitem.isoDate))
 
       NYTechchannel.send({ embeds: [NYTechnewsEmbed] });
+      NYTechchanne.send(NewsSeparator);
     }
 
   }
@@ -402,7 +418,7 @@ async function getNews() {
 
     if (new Date(NYTScienceitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("NYT Article Published" + NYTScienceitem.title)
-      let NYTSciencechannel = client.channels.cache.get("929467124714471464")
+      let NYTSciencechannel = client.channels.cache.get(newsChannel)
       const NYTScienceEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times - Science', iconURL: 'https://i.imgur.com/F2BvhTh.jpg', url: 'https://www.nytimes.com/section/science' })
         .setColor('#000000')
@@ -413,6 +429,7 @@ async function getNews() {
         .setTimestamp(new Date(NYTScienceitem.isoDate))
 
       NYTSciencechannel.send({ embeds: [NYTScienceEmbed] });
+      NYTSciencechannel.send(NewsSeparator);
     }
   }
   // ============================================================================================================
@@ -422,7 +439,7 @@ async function getNews() {
 
     if (new Date(NYTHealthitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("NYT Article Published" + NYTHealthitem.title)
-      let NYTHealthchannel = client.channels.cache.get("929467124714471464")
+      let NYTHealthchannel = client.channels.cache.get(newsChannel)
       const NYTHealthEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times - Health', iconURL: 'https://i.imgur.com/F2BvhTh.jpg', url: 'https://www.nytimes.com/section/health' })
         .setColor('#000000')
@@ -433,6 +450,7 @@ async function getNews() {
         .setTimestamp(new Date(NYTHealthitem.isoDate))
 
       NYTHealthchannel.send({ embeds: [NYTHealthEmbed] });
+      NYTHealthchannel.send(NewsSeparator);
     }
   }
 
@@ -443,7 +461,7 @@ async function getNews() {
 
     if (new Date(ReutersENGitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("Reuters Article Published" + ReutersENGitem.title)
-      let ReutersENGchannel = client.channels.cache.get("929467124714471464")
+      let ReutersENGchannel = client.channels.cache.get(newsChannel)
       const ReutersENGEmbed = new MessageEmbed()
         .setAuthor({ name: 'Reatures ENG', iconURL: 'https://i.imgur.com/klTaUZH.jpg', url: 'https://www.nytimes.com/section/science' })
         .setColor('#0099ff')
@@ -454,6 +472,7 @@ async function getNews() {
         .setTimestamp(new Date(ReutersENGitem.isoDate))
 
       ReutersENGchannel.send({ embeds: [ReutersENGEmbed] });
+      ReutersENGchannel.send(NewsSeparator);
     }
   }
 
@@ -463,7 +482,7 @@ async function getNews() {
 
     if (new Date(NYTimesitem.isoDate) >= new Date(Date.now() - 1800000)) {
       console.log("NYT Article Published" + NYTimesitem.title)
-      let NYTimeschannel = client.channels.cache.get("929467124714471464")
+      let NYTimeschannel = client.channels.cache.get(newsChannel)
       const NYTimesnewsEmbed = new MessageEmbed()
         .setAuthor({ name: 'New York Times', iconURL: 'https://i.imgur.com/F2BvhTh.jpg', url: 'https://www.nytimes.com' })
         .setColor('#000000')
@@ -474,10 +493,12 @@ async function getNews() {
         .setTimestamp(new Date(NYTimesitem.isoDate))
 
       NYTimeschannel.send({ embeds: [NYTimesnewsEmbed] });
+      NYTimeschannel.send(NewsSeparator);
     }
 
   }
 }
+
 
 //=====================================================================
 // function addChannelID(id) {
