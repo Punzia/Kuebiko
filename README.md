@@ -2,4 +2,4 @@
 🤖 Discord Bot
 
 /discordjs = Old Kuebiko on Discord.js Library
-/golang = New Kuebiko on Golang
+/golang = New Kuebiko on Golang!
